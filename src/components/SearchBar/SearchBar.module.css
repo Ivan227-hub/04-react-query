@@ -1,33 +1,22 @@
-import React, { useState } from "react";
-import styles from "./SearchBar.module.css";
-
-interface SearchBarProps {
-  onSubmit: (query: string) => void;
+.form {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
-  const [query, setQuery] = useState("");
+.input {
+  width: 260px;
+  height: 36px;
+  padding: 8px;
+}
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    onSubmit(query.trim());
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <input
-        className={styles.input}
-        type="text"
-        placeholder="Search movies..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <button className={styles.button} type="submit">
-        Search
-      </button>
-    </form>
-  );
-};
-
-export default SearchBar;
+.button {
+  height: 36px;
+  padding: 0 12px;
+  background: #0a66c2;
+  color: #fff;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
