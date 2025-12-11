@@ -1,12 +1,14 @@
 import axios from "axios";
 import type { MoviesResponse } from "../types/movie";
 
-
-const API_KEY = "ВАШ_КЛЮЧ_TMDB";
+const API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1YWZkNDUxMWQ3OGQzZTg1N2IyOGMxM2M4YzQ1N2NiOSIsIm5iZiI6MTc2NDY3Nzk4OS42NDksInN1YiI6IjY5MmVkOTY1NDVjZmU4NGUxNjI2ZjNkNCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.kudrzA3OazjiYVuWZnmFvrkra4T0eI3InwXrJbmXy4Y"; 
 const BASE_URL = "https://api.themoviedb.org/3/search/movie";
 
-export const fetchMovies = async (query: string, page: number): Promise<MoviesResponse> => {
-  const response = await axios.get(BASE_URL, {
+export const fetchMovies = async (
+  query: string,
+  page: number
+): Promise<MoviesResponse> => {
+  const { data } = await axios.get(BASE_URL, {
     params: {
       api_key: API_KEY,
       query,
@@ -14,5 +16,5 @@ export const fetchMovies = async (query: string, page: number): Promise<MoviesRe
     },
   });
 
-  return response.data;
+  return data;
 };
