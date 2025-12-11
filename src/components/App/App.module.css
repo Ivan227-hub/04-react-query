@@ -1,8 +1,16 @@
-.msg {
-  text-align: center;
-  margin-top: 20px;
+.container {
+  width: 900px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
+.form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Пагінація з ТЗ */
 .pagination {
   display: flex;
   justify-content: center;
