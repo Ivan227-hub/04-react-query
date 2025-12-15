@@ -1,20 +1,27 @@
 import axios from "axios";
-import type { MoviesResponse } from "../types/movie"; // ← ТАК правильно
+import type { Movie } from "../types/movie";
 
-const API_KEY = import.meta.env.VITE_API_KEY;
+const API_KEY = import.meta.env.VITE_TMDB_TOKEN;
 const BASE_URL = "https://api.themoviedb.org/3/search/movie";
+
+export interface MoviesResponse {
+  page: number;
+  results: Movie[];
+  total_pages: number;
+  total_results: number; // добавляем сюда
+}
 
 export const fetchMovies = async (
   query: string,
   page: number
 ): Promise<MoviesResponse> => {
   const response = await axios.get(BASE_URL, {
-    params: {
-      api_key: API_KEY,
-      query,
-      page,
+    params: { query, page },
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
     },
   });
 
-  return response.data;
+  // TMDB реально возвращает total_results, поэтому просто приводим тип
+  return response.data as MoviesResponse;
 };

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "react-hot-toast";
 import styles from "./SearchBar.module.css";
 
 interface SearchBarProps {
@@ -10,13 +11,17 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim()) {
+      toast.error("Введіть пошуковий запит");
+      return;
+    }
     onSubmit(query.trim());
   };
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <input
+        name="search"
         className={styles.input}
         type="text"
         placeholder="Search movies..."
