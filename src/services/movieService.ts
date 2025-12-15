@@ -1,27 +1,37 @@
 import axios from "axios";
 import type { Movie } from "../types/movie";
 
-const API_KEY = import.meta.env.VITE_TMDB_TOKEN;
+// Базовый URL TMDB API
 const BASE_URL = "https://api.themoviedb.org/3/search/movie";
 
+// Импортируем API ключ из переменных окружения
+const API_KEY = import.meta.env.VITE_TMDB_TOKEN;
+
+// Интерфейс для ответа от API
 export interface MoviesResponse {
   page: number;
   results: Movie[];
   total_pages: number;
-  total_results: number; // добавляем сюда
+  total_results: number;
 }
 
+// Функция для получения фильмов
 export const fetchMovies = async (
   query: string,
   page: number
 ): Promise<MoviesResponse> => {
-  const response = await axios.get(BASE_URL, {
-    params: { query, page },
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
+  if (!API_KEY) {
+    throw new Error("TMDB API key is missing. Check your .env file.");
+  }
+
+  const response = await axios.get<MoviesResponse>(BASE_URL, {
+    params: {
+      query,
+      page,
+      api_key: API_KEY, // используем API key для v3
+      language: "uk-UA", // можно указать язык
     },
   });
 
-  // TMDB реально возвращает total_results, поэтому просто приводим тип
-  return response.data as MoviesResponse;
+  return response.data;
 };
