@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
+import toast, { Toaster } from "react-hot-toast";
+
 import { fetchMovies } from "../../services/movieService";
+import type { Movie } from "../../types/movie";
+import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import MovieModal from "../MovieModal/MovieModal";
-import SearchBar from "../SearchBar/SearchBar";
-import Loader from "../Loader/Loader";
-import ErrorMessage from "../ErrorMessage/ErrorMessage";
-import { toast, Toaster } from "react-hot-toast";
-import type { Movie, MoviesResponse } from "../../types/movie";
+
 import css from "./App.module.css";
 
 export default function App() {
@@ -16,53 +16,62 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const moviesQuery = useQuery<MoviesResponse, Error>({
+  const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
-    enabled: query.length > 0,
-    // в v5 keepPreviousData больше нет, вместо него можно использовать staleTime/cacheTime
-    staleTime: 1000 * 60,  // 1 минута
+    enabled: Boolean(query),
+    placeholderData: keepPreviousData,
   });
 
-  const data = moviesQuery.data;
-
-  const handleSearch = (newQuery: string) => {
-    if (!newQuery) {
-      toast.error("Введіть пошуковий запит");
-      return;
+  useEffect(() => {
+    if (isSuccess && data?.results.length === 0) {
+      toast("Фільми не знайдені");
     }
-    setQuery(newQuery);
-    setPage(1);
-  };
+  }, [isSuccess, data]);
 
   return (
-    <div className={css.container}>
-      <SearchBar onSubmit={handleSearch} />
-      <Toaster />
+    <div>
+      <SearchBar
+        onSubmit={q => {
+          setQuery(q);
+          setPage(1);
+        }}
+      />
 
-      {moviesQuery.isLoading && <Loader />}
-      {moviesQuery.isError && <ErrorMessage message="Помилка завантаження" />}
-      {moviesQuery.isSuccess && data?.results.length === 0 && toast("Фільми не знайдено")}
+      {isLoading && <p>Loading...</p>}
+      {isError && <p>Error</p>}
 
-      {data && (
-        <MovieGrid movies={data.results} onSelect={(movie) => setSelectedMovie(movie)} />
+      {isSuccess && (
+        <>
+          <MovieGrid
+            movies={data.results}
+            onSelect={setSelectedMovie}
+          />
+
+          {data.total_pages > 1 && (
+            <ReactPaginate
+              pageCount={data.total_pages}
+              pageRangeDisplayed={5}
+              marginPagesDisplayed={1}
+              onPageChange={({ selected }) => setPage(selected + 1)}
+              forcePage={page - 1}
+              containerClassName={css.pagination}
+              activeClassName={css.active}
+              nextLabel="→"
+              previousLabel="←"
+            />
+          )}
+        </>
       )}
 
-      {selectedMovie && <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />}
-
-      {data && data.total_pages > 1 && (
-        <ReactPaginate
-          pageCount={data.total_pages}
-          pageRangeDisplayed={5}
-          marginPagesDisplayed={1}
-          onPageChange={({ selected }) => setPage(selected + 1)}
-          forcePage={page - 1}
-          containerClassName={css.pagination}
-          activeClassName={css.active}
-          nextLabel="→"
-          previousLabel="←"
+      {selectedMovie && (
+        <MovieModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
         />
       )}
+
+      <Toaster />
     </div>
   );
 }

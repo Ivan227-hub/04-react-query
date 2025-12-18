@@ -1,6 +1,6 @@
-
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import type { MouseEvent } from "react";
 import type { Movie } from "../../types/movie";
 import css from "./MovieModal.module.css";
 
@@ -9,29 +9,51 @@ interface MovieModalProps {
   onClose: () => void;
 }
 
+const modalRoot = document.getElementById("modal-root") as HTMLElement;
+
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
   }, [onClose]);
 
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
   return createPortal(
-    <div className={css.overlay} onClick={onClose}>
-      <div className={css.modal} onClick={(e) => e.stopPropagation()}>
-        <img
-          src={movie.backdrop_path ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` : undefined}
-          alt={movie.title}
-        />
+    <div className={css.backdrop} onClick={handleBackdropClick}>
+      <div className={css.modal}>
+        <button
+          className={css.close}
+          aria-label="Закрити модальне вікно"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+
+        {movie.backdrop_path && (
+          <img
+            src={`https://image.tmdb.org/t/p/w780${movie.backdrop_path}`}
+            alt={movie.title}
+          />
+        )}
+
         <h2>{movie.title}</h2>
         <p>{movie.overview}</p>
-        <p>Release Date: {movie.release_date}</p>
-        <p>Rating: {movie.vote_average}</p>
-        <button onClick={onClose} aria-label="Close modal">Close</button>
+        <p>Дата релізу: {movie.release_date}</p>
+        <p>Рейтинг: {movie.vote_average}</p>
       </div>
     </div>,
-    document.body
+    modalRoot
   );
 }
