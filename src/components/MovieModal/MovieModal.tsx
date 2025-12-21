@@ -9,12 +9,14 @@ interface MovieModalProps {
   onClose: () => void;
 }
 
-const modalRoot = document.getElementById("modal-root") as HTMLElement;
+const modalRoot = document.getElementById("modal-root");
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+      }
     };
 
     document.addEventListener("keydown", onKeyDown);
@@ -27,8 +29,14 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
   }, [onClose]);
 
   const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   };
+
+  if (!modalRoot) {
+    return null;
+  }
 
   return createPortal(
     <div className={css.backdrop} onClick={handleBackdropClick}>
